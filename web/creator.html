@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!--Meta viwport is used for responsive display on mobiles-->
+        <meta name="viewport" content="width=device-width,
+        maximum-scale=0.9, user-scalable=0">
+        <!-- this is to support special characters and emoji-->
+        <meta cahrset="UTF-8">
+        <title>Data Creator</title>
+        <link rel="stylesheet" href="styles.css"/>
+    </head>    
+    <body>
+        <div id="content">
+            <h1>Data Creator</h1>
+            <div>
+                <input id="student" type="text"
+                placeholder="Your Name" />
+                <span id="instructions"></span>
+                <button id="advancedBtn" onclick="start()">Start</button>
+            </div>
+            <br>
+            <div id="sketchPadContainer"
+                style="visibility:hidden"></div>
+        </div>
+        <script src="../common/draw.js"></script>
+        <script src="js/sketchPad.js"></script>
+         <!--initialize the script -->
+        <script>
+
+            let index=0;
+            const labels=["car","fish","house", "tree","bicycle","guitar", "pencil","clock"];
+            // Student Object
+            const data={
+                student:null,
+                session: new Date().getTime(),
+                drawings:{}
+            }    
+            const sketchPad= 
+                new SketchPad(sketchPadContainer);
+
+
+            function start(){
+                if(student.value==""){
+                    alert("Please type your name first!");
+                    return;
+                }
+                data.student=student.value;
+                student.style.display="none";
+                // make the canvas visible
+                sketchPadContainer.style.visibility="visible";
+                const label =labels[index];
+                instructions.innerHTML="Please draw a "+label;
+                advancedBtn.innerHTML="NEXT";
+                advancedBtn.onclick=next;
+    
+            }  
+            
+            function next(){
+                if(sketchPad.paths.length==0){
+                    alert("Draw something first");
+                    return;
+                }
+                //get labels of the path that was drawn
+                const label=labels[index];
+                // keep the history of use drawings
+                data.drawings[label]=sketchPad.paths;
+                sketchPad.reset();
+                index++;
+                if(index<labels.length){
+                    const nextLabel =labels[index];
+                    instructions.innerHTML="Please draw a "+ nextLabel;
+                }else{
+                    sketchPadContainer.style.visibility="hidden";
+                    instructions.innerHTML="Great Work, Thanks";
+                    advancedBtn.innerHTML="SAVE";
+                    advancedBtn.onclick=save;
+                }
+            }
+
+            function save(){
+                advancedBtn.style.display='none';
+                instructions.innerHTML="Please place your downloaded file with the dataset";
+
+                const element=document.createElement('a');
+                element.setAttribute('href',
+                    'data:text/plain;charset=utf-8, '+
+                    encodeURIComponent(JSON.stringify(data)));
+
+                const fileName= data.session+".json";
+                element.setAttribute('download', fileName);
+                //make the element invisible as it will be added to the body 
+                element.style.display='non';
+                document.body.appendChild(element);
+                element.click();
+                //quickly remove it 
+                document.body.removeChild(element);
+
+
+            }
+        </script>
+    </body>
+</html>
+
+<!--https://www.youtube.com/watch?v=fa3BE_VwyS4&list=PLB0Tybl0UNfYe9aJXfWw-Dw_4VnFrqRC4-->
